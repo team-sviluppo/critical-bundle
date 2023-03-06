@@ -1,0 +1,41 @@
+{
+  "name": "critical-bundle",
+  "version": "1.0.0",
+  "description": "This project was bootstrapped with Fastify-CLI.",
+  "main": "app.js",
+  "type": "module",
+  "directories": {
+    "test": "test"
+  },
+  "engines": {
+    "node": ">=16.15"
+  },
+  "scripts": {
+    "test": "tap \"test/**/*.test.js\"",
+    "start": "fastify start -l info app.js",
+    "dev": "fastify start -w -l info -P app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/core": "^7.21.0",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/register": "^7.21.0",
+    "@fastify/autoload": "^5.0.0",
+    "@fastify/compress": "^6.2.0",
+    "@fastify/sensible": "^4.1.0",
+    "adm-zip": "^0.5.10",
+    "async": "^3.2.4",
+    "fastify": "^4.14.0",
+    "fastify-cli": "^4.1.1",
+    "fastify-plugin": "^3.0.0",
+    "file-saver": "^2.0.5",
+    "fluent-json-schema": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/async": "^3.2.18",
+    "critical": "^5.0.4",
+    "tap": "^16.1.0"
+  }
+}

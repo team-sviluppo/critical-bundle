@@ -1,0 +1,71 @@
+//process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+process.setMaxListeners(100);
+//require('events').EventEmitter.prototype._maxListeners = 0;
+const critical = require('critical');
+
+const path = require('path');
+let outputCssPath = path.resolve(__dirname);
+//nome del dominio di base
+var HostUrl = 'https://www.texgroupitalia.com/';
+
+var UrlForGeneratingCriticalCss = [
+    '/shop/','/product-category/antipioggia-winter/',
+];
+
+//var rootCas = require('ssl-root-cas').create();
+
+//aggiungere le certificate authority locali nel caso ssl non sia valido
+//rootCas.addFile(path.resolve(__dirname + '/ssl/devilbox-ca.crt'));
+
+// aggiungere il certificato tra quelli affidabili in caso di certificati autogenerati
+//require('https').globalAgent.options.ca = rootCas;
+
+let screenSizes = [
+    {width: 320, height: 640},
+    {width: 320, height: 750},
+    {width: 767, height: 640},
+    {width: 767, height: 850},
+    {width: 991, height: 640},
+    {width: 1199, height: 900},
+    {width: 1199, height: 1200},
+    {width: 1920, height: 1080},
+    {width: 1920, height: 1440},
+    {width: 2560, height: 2300},
+];
+let includeRules = ['nav', '.nav', '.navbar'];
+
+
+for (var index in UrlForGeneratingCriticalCss) {
+
+    let EachUrl=UrlForGeneratingCriticalCss[index];
+
+    var TargetUrl = HostUrl + EachUrl;
+
+    if(EachUrl==='' || EachUrl==='/')
+        EachUrl='home';
+    let outputCssName = outputCssPath +path.sep+ (EachUrl.replace(/\//g, '-')) + '.css';
+    //console.log(EachUrl);
+    //console.log(EachUrl.replace(/\//g, '-'));
+    //console.log(outputCssName);
+
+    critical.generate({
+        src: TargetUrl,
+        dimensions: screenSizes,
+        ignore: {
+            atrule: ['@font-face'],
+            rule: [/url\(/,]
+        },
+        include: includeRules,
+        // Output results to file
+        target: {
+            css: outputCssName,
+
+        },
+
+    }).then(function (success) {
+        console.log('completato');
+    }, function (err) {
+        console.log('errore', err);
+    });
+
+}
