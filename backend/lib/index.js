@@ -3,13 +3,13 @@ import { generate } from 'critical';
 import { sep } from 'path';
 import AdmZip from 'adm-zip';
 
-export default async function generateCSS (outputDir, host, urls, rules, screenSizes) {
+export default async function generateCSS (outputDir, payload) {
 
   let promises = [];
   let files = []
 
-  urls.forEach(u => {
-    let url = `${host}${u}`;
+  payload.urls.forEach(u => {
+    let url = `${payload.host}${u}`;
     if(url === '' || url === '/') url = 'home';
     const filename = (url.replace(/\//g, '-')) + '.css';
     const pathFile = `${outputDir}${sep}${filename}`;
@@ -21,12 +21,12 @@ export default async function generateCSS (outputDir, host, urls, rules, screenS
 
     promises.push(generate({
       src: url,
-      dimensions: screenSizes,
+      dimensions: payload.screenSizes,
       ignore: {
           atrule: ['@font-face'],
           rule: [/url\(/,]
       },
-      include: rules,
+      include: payload.rules,
       // Output results to file
       target: {
           css: pathFile,

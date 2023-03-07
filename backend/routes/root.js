@@ -18,7 +18,8 @@ import { createReadStream } from 'node:fs';
 const bodyJsonSchema = object()
   .prop('host', string().required())
   .prop('urls', array().required())
-  .prop('rules', array().default([]));
+  .prop('rules', array().default([]))
+  .prop('screen', array().default([]));
 
 const queryStringJsonSchema = object()
   .prop('file', string().required());
@@ -38,11 +39,9 @@ export default async function (fastify, opts) {
   fastify.addHook('preHandler', async (request, reply) => {
     if (request.method == 'POST') {
       try {
-        const result = await generateCSS(fastify.output, 
-                                          request.body.host, 
-                                          request.body.urls, 
-                                          request.body.rules, 
-                                          fastify.screenSizes);
+        /** generate css */
+        const result = await generateCSS(fastify.output, request.body);
+        /** create zip file to send client */
         pathZip = createZip(result, fastify.output);
       } catch (err) {
         reply.status(500).send(err);
