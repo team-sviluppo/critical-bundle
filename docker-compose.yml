@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  backend:
+    container_name: critical-bundle-backend-${SERVER}
+    image: teamsviluppo/critical-bundle-backend
+    restart: always
+    mem_reservation: 2G
+    shm_size: 1gb
+    environment:
+      PORT: 3000
+    ports:
+      - 3000:3000
+    networks:
+      - critical-bundle-network
+    
+  frontend:
+    container_name: critical-bundle-frontend-${SERVER}
+    image: teamsviluppo/critical-bundle-frontend
+    restart: always
+    networks:
+      - critical-bundle-network
+    environment:
+      VITE_API: ${VITE_API}
+    ports:
+      - '8080:80'
+    depends_on:
+      - backend
+
+networks:
+   critical-bundle-network:
+      name: critical-bundle
+      driver: bridge
+      ipam:
+         driver: default
+         config:
+            - subnet: 192.168.180.0/24
+
+volumes:
+  db:
+    driver: local

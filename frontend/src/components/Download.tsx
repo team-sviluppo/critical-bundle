@@ -1,5 +1,5 @@
 import { Flex, Button, createStyles, Notification } from '@mantine/core';
-import { useEffect, useContext, useState, useCallback } from 'react';
+import { useEffect, useContext, useState } from 'react';
 import CriticalBundleContext from 'context';
 import { IconDownload, IconX, IconCheck } from '@tabler/icons-react';
 import { useGenerate } from 'hooks';
@@ -19,14 +19,8 @@ export function Download() {
     const [isDownload, setIsDownload] = useState(false);
     const [loading, setLoading] = useState(false);
     const [generate, generateError, setGenerate] = useGenerate();
-
-    const str2bytes = useCallback((str: any) => {
-        var bytes = new Uint8Array(str.length);
-        for (var i=0; i<str.length; i++) {
-            bytes[i] = str.charCodeAt(i);
-        }
-        return bytes;
-    }, []);
+    const [notificationError, setNotificationError] = useState<boolean>(false);
+    const [notificationOk, setNotificationOk] = useState<boolean>(false);
 
     useEffect(() => {
         if (!host || !screen || !urls) {
@@ -48,13 +42,15 @@ export function Download() {
     useEffect(() => {
         if (!generate) return;
         setLoading(false);
-        var blob = new Blob([generate], {type: "application/zip"});
+        let blob = new Blob([generate], {type: "application/zip"});
         saveAs(blob, "generateCss.zip");
+        setNotificationOk(true);
     }, [generate]);
 
     useEffect(() => {
         if (!generateError) return;
         setLoading(false);
+        setNotificationError(true);
     }, [generateError]);
 
     return (
@@ -73,15 +69,15 @@ export function Download() {
                 </Button>
             </Flex>
 
-            { generateError ? 
-                (<Notification icon={<IconX size="1.1rem" />} color="red">
+            { notificationError ? 
+                (<Notification icon={<IconX size="1.1rem" />} color="red" onClose={()=>setNotificationError(false)}>
                     { generateError }
                 </Notification>) :
                 null
             }
 
-            { generate ? 
-                (<Notification icon={<IconCheck size="1.1rem" />} color="teal" title="Download">
+            { notificationOk ? 
+                (<Notification icon={<IconCheck size="1.1rem" />} color="teal" title="Download" onClose={()=>setNotificationOk(false)}>
                     Download eseguito con successo.
                  </Notification>) :
                 null

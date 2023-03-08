@@ -21,15 +21,8 @@ const bodyJsonSchema = object()
   .prop('rules', array().default([]))
   .prop('screen', array().default([]));
 
-const queryStringJsonSchema = object()
-  .prop('file', string().required());
-
 const schemaPost = {
   body: bodyJsonSchema
-}
-
-const schemaGet = {
-  querystring: queryStringJsonSchema
 }
 
 export default async function (fastify, opts) {
@@ -42,24 +35,32 @@ export default async function (fastify, opts) {
         /** generate css */
         const result = await generateCSS(fastify.output, request.body);
         /** create zip file to send client */
-        pathZip = createZip(result, fastify.output);
+        if (result) {
+          pathZip = createZip(result, fastify.output);
+          if (!pathZip)
+            return reply.header('Content-Type', 'application/json')
+                        .status(500)
+                        .send('ERRORE: Non sono riuscito a creare i file ZIP.');
+        }
+        else
+          return reply.header('Content-Type', 'application/json')
+                      .status(500)
+                      .send('ERRORE: Non sono riuscito a creare i files CSS.');
       } catch (err) {
-        reply.status(500).send(err);
+        return reply.header('Content-Type', 'application/json')
+                    .status(500)
+                    .send(err);
       }
     }
   });
 
   /** generate css files */
   fastify.post('/generate', { schemaPost }, async (request, reply) => {
-    if (pathZip) {
-      const readStream = createReadStream(pathZip);
-      reply.header('Content-Disposition', `attachment; filename=${pathZip}`); //imposta l'header di risposta per il download
-      reply.header('Content-Type', 'application/zip');
-      // When using async-await with stream you will need to return or await the reply object:
-      return reply.status(201).send(readStream);
-    } else {
-      reply.status(500).send("ERRORE: Non sono riuscito a creare i files.")
-    }
+    const readStream = createReadStream(pathZip);
+    reply.header('Content-Disposition', `attachment; filename=${pathZip}`); //imposta l'header di risposta per il download
+    reply.header('Content-Type', 'application/zip');
+    // When using async-await with stream you will need to return or await the reply object:
+    return reply.status(201).send(readStream);
   });
 
 }

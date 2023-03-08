@@ -15,7 +15,7 @@ export function useGenerate() : [any, any, any] {
         }).then((response) => {
             setResponse(response.data);
         }).catch((error) => {
-            setError(error);
+            setError(error.message);
         });
     }, []);
 
