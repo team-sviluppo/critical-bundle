@@ -18,17 +18,11 @@ import { createReadStream } from 'node:fs';
 const bodyJsonSchema = object()
   .prop('host', string().required())
   .prop('urls', array().required())
-  .prop('rules', array().default([]));
-
-const queryStringJsonSchema = object()
-  .prop('file', string().required());
+  .prop('rules', array().default([]))
+  .prop('screen', array().default([]));
 
 const schemaPost = {
   body: bodyJsonSchema
-}
-
-const schemaGet = {
-  querystring: queryStringJsonSchema
 }
 
 export default async function (fastify, opts) {
@@ -38,29 +32,35 @@ export default async function (fastify, opts) {
   fastify.addHook('preHandler', async (request, reply) => {
     if (request.method == 'POST') {
       try {
-        const result = await generateCSS(fastify.output, 
-                                          request.body.host, 
-                                          request.body.urls, 
-                                          request.body.rules, 
-                                          fastify.screenSizes);
-        pathZip = createZip(result, fastify.output);
+        /** generate css */
+        const result = await generateCSS(fastify.output, request.body);
+        /** create zip file to send client */
+        if (result) {
+          pathZip = createZip(result, fastify.output);
+          if (!pathZip)
+            return reply.header('Content-Type', 'application/json')
+                        .status(500)
+                        .send('ERRORE: Non sono riuscito a creare i file ZIP.');
+        }
+        else
+          return reply.header('Content-Type', 'application/json')
+                      .status(500)
+                      .send('ERRORE: Non sono riuscito a creare i files CSS.');
       } catch (err) {
-        reply.status(500).send(err);
+        return reply.header('Content-Type', 'application/json')
+                    .status(500)
+                    .send(err);
       }
     }
   });
 
   /** generate css files */
   fastify.post('/generate', { schemaPost }, async (request, reply) => {
-    if (pathZip) {
-      const readStream = createReadStream(pathZip);
-      reply.header('Content-Disposition', `attachment; filename=${pathZip}`); //imposta l'header di risposta per il download
-      reply.header('Content-Type', 'application/zip');
-      // When using async-await with stream you will need to return or await the reply object:
-      return reply.status(201).send(readStream);
-    } else {
-      reply.status(500).send("ERRORE: Non sono riuscito a creare i files.")
-    }
+    const readStream = createReadStream(pathZip);
+    reply.header('Content-Disposition', `attachment; filename=${pathZip}`); //imposta l'header di risposta per il download
+    reply.header('Content-Type', 'application/zip');
+    // When using async-await with stream you will need to return or await the reply object:
+    return reply.status(201).send(readStream);
   });
 
 }

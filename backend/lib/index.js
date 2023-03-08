@@ -3,13 +3,21 @@ import { generate } from 'critical';
 import { sep } from 'path';
 import AdmZip from 'adm-zip';
 
-export default async function generateCSS (outputDir, host, urls, rules, screenSizes) {
+/**
+ * Generate CSS
+ * @param {*} reply 
+ * @param {*} outputDir 
+ * @param {*} payload 
+ * @returns 
+ */
+export default async function generateCSS (outputDir, payload) {
 
-  let promises = [];
-  let files = []
+  let result = [];
+  let files = [];
 
-  urls.forEach(u => {
-    let url = `${host}${u}`;
+  await payload.urls.reduce(async (a, u) => {
+
+    let url = `${payload.host}${u.trim()}`;
     if(url === '' || url === '/') url = 'home';
     const filename = (url.replace(/\//g, '-')) + '.css';
     const pathFile = `${outputDir}${sep}${filename}`;
@@ -19,23 +27,30 @@ export default async function generateCSS (outputDir, host, urls, rules, screenS
         pathFile: pathFile
     })
 
-    promises.push(generate({
+    // Wait for the previous item to finish processing
+    await a;
+
+    let options = {
       src: url,
-      dimensions: screenSizes,
+      dimensions: payload.screenSizes,
       ignore: {
           atrule: ['@font-face'],
           rule: [/url\(/,]
       },
-      include: rules,
       // Output results to file
       target: {
           css: pathFile,
       }
-    }))
+    }
 
-  });
+    if (payload.rules)
+      options["include"] = payload.rules
 
-  const result = await Promise.all(promises);
+    // Process this item
+    const response = await generate(options);
+    result.push(response);
+
+  }, Promise.resolve());
 
   files.forEach((file, index) => {
     result[index] = {
@@ -48,12 +63,24 @@ export default async function generateCSS (outputDir, host, urls, rules, screenS
 
 };
 
+/**
+ * create ZIP file
+ * @param {*} content 
+ * @param {*} pathZip 
+ * @returns 
+ */
 export function createZip (content, pathZip) {
     let zip = new AdmZip();
+
+  try {
+
     const path = `${pathZip}\cssGenerate.zip`;
     content.forEach(item => {
         zip.addFile(`${item.fileName}`, Buffer.from(item.css, "utf8"), `${item.fileName}`);
     });
     zip.writeZip(path);
     return path;
+  } catch (e) {
+    return null;
+  }
 } 
