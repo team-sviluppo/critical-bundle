@@ -11,4 +11,4 @@ and to run with this command:
 make publish-production
 ```
 
-Go to [http://localhost:8080]
+Go to [http://localhost:8080](http://localhost:8080)
