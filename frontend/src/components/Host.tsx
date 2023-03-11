@@ -7,7 +7,7 @@ import { useValidHost, useStringEmpty } from 'hooks';
 const useStyles = createStyles((theme, { floating }: { floating: boolean }) => ({
   root: {
     position: 'relative',
-    top: 140
+    top: 120
   },
 
   label: {

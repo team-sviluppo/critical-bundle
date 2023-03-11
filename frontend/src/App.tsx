@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Host, Header, Urls, Sizes, Download } from 'components';
+import { Host, Header, Urls, Download, Screen } from 'components';
 import CriticalBundleContext from 'context';
 import { IScreenInterface } from "interfaces";
 
@@ -10,8 +10,6 @@ function App() {
   const [screen, setScreen] = useState<IScreenInterface[] | null>(null);
   
   return (
-    
-      <div className="App">
         <CriticalBundleContext.Provider value={{setHost,
                                                 setUrls,
                                                 setScreen,
@@ -19,12 +17,11 @@ function App() {
                                                 urls,
                                                 screen}}>
           <Header />
+          <Download />
           <Host />
           <Urls />
-          <Sizes />
-          <Download />
+          <Screen />
         </CriticalBundleContext.Provider>
-      </div>
   )
 }
 
