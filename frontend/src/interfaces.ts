@@ -2,6 +2,10 @@ export interface IScreenInterface {
   width: number;
   height: number;
 }
+export interface IScreenTableInterface {
+  id: string;
+  row: IScreenInterface;
+}
 
 export interface IPayloadAPIInterface {
     host: string | null;

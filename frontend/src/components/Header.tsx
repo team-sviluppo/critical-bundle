@@ -4,7 +4,7 @@ import logo from 'assets/logo.png';
 const useStyles = createStyles((theme) => ({
   header: {
     position: 'relative',
-    top: 60
+    top: 40
   }
 }));
 
@@ -17,7 +17,7 @@ export function Header() {
             gap={{ base: 'sm', sm: 'lg' }}
             justify={{ sm: 'center' }}
         >
-            <Image width={200} src={logo} alt={logo} />
+            <Image width={180} src={logo} alt={logo} />
         </Flex>
   );
 }

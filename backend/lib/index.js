@@ -17,38 +17,43 @@ export default async function generateCSS (outputDir, payload) {
 
   await payload.urls.reduce(async (a, u) => {
 
-    let url = `${payload.host}${u.trim()}`;
-    if(url === '' || url === '/') url = 'home';
-    const filename = (url.replace(/\//g, '-')) + '.css';
-    const pathFile = `${outputDir}${sep}${filename}`;
+    try {
 
-    files.push({
-        fileName: filename,
-        pathFile: pathFile
-    })
+      let url = `${payload.host}${u.trim()}`;
+      if(url === '' || url === '/') url = 'home';
+      const filename = (url.replace(/\//g, '-')) + '.css';
+      const pathFile = `${outputDir}${sep}${filename}`;
 
-    // Wait for the previous item to finish processing
-    await a;
+      files.push({
+          fileName: filename,
+          pathFile: pathFile
+      })
 
-    let options = {
-      src: url,
-      dimensions: payload.screenSizes,
-      ignore: {
-          atrule: ['@font-face'],
-          rule: [/url\(/,]
-      },
-      // Output results to file
-      target: {
-          css: pathFile,
+      // Wait for the previous item to finish processing
+      await a;
+
+      let options = {
+        src: url,
+        dimensions: payload.screenSizes,
+        ignore: {
+            atrule: ['@font-face'],
+            rule: [/url\(/,]
+        },
+        // Output results to file
+        target: {
+            css: pathFile,
+        }
       }
+
+      if (payload.rules)
+        options["include"] = payload.rules
+
+      // Process this item
+      const response = await generate(options);
+      result.push(response);
+    } catch (e) {
+      return null;
     }
-
-    if (payload.rules)
-      options["include"] = payload.rules
-
-    // Process this item
-    const response = await generate(options);
-    result.push(response);
 
   }, Promise.resolve());
 

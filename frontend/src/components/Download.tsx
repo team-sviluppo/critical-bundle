@@ -1,14 +1,21 @@
-import { Flex, Button, createStyles, Notification } from '@mantine/core';
+import { Flex, Button, createStyles, Badge } from '@mantine/core';
 import { useEffect, useContext, useState } from 'react';
 import CriticalBundleContext from 'context';
 import { IconDownload, IconX, IconCheck } from '@tabler/icons-react';
 import { useGenerate } from 'hooks';
 import { saveAs } from 'file-saver';
+import { useClickOutside } from '@mantine/hooks';
 
 const useStyles = createStyles((theme) => ({
   download: {
     position: 'relative',
-    top: 260
+    top: 80,
+    padding: 10
+  },
+  notification: {
+    position: 'relative',
+    padding: 10,
+    zIndex: 1000
   }
 }));
 
@@ -21,6 +28,9 @@ export function Download() {
     const [generate, generateError, setGenerate] = useGenerate();
     const [notificationError, setNotificationError] = useState<boolean>(false);
     const [notificationOk, setNotificationOk] = useState<boolean>(false);
+
+    const refError = useClickOutside(() => setNotificationError(false));
+    const refOk = useClickOutside(() => setNotificationOk(false));
 
     useEffect(() => {
         if (!host || !screen || !urls) {
@@ -45,6 +55,7 @@ export function Download() {
         let blob = new Blob([generate], {type: "application/zip"});
         saveAs(blob, "generateCss.zip");
         setNotificationOk(true);
+        setGenerate(null);
     }, [generate]);
 
     useEffect(() => {
@@ -67,21 +78,31 @@ export function Download() {
                         onClick={() => setLoading(true)}>
                             Download
                 </Button>
+
             </Flex>
 
-            { notificationError ? 
-                (<Notification icon={<IconX size="1.1rem" />} color="red" onClose={()=>setNotificationError(false)}>
-                    { generateError }
-                </Notification>) :
-                null
-            }
+            <div className={classes.notification}>
+                <Flex
+                    direction={{ base: 'column', sm: 'row' }}
+                    gap={{ base: 'sm', sm: 'lg' }}
+                    justify={{ sm: 'center' }}
+                >
+                    { notificationError ? 
+                        (<Badge ref={refError} pr={3} color="red" size="lg" variant="filled">
+                            { generateError }
+                        </Badge>) :
+                        null
+                    }
 
-            { notificationOk ? 
-                (<Notification icon={<IconCheck size="1.1rem" />} color="teal" title="Download" onClose={()=>setNotificationOk(false)}>
-                    Download eseguito con successo.
-                 </Notification>) :
-                null
-            }
+                    { notificationOk ? 
+                        (<Badge ref={refOk} pr={3} color="green" size="lg" variant="filled">
+                            Download eseguito con successo.
+                        </Badge>) :
+                        null
+                    }
+                </Flex>
+            </div>
+
         </div>
   );
 }
