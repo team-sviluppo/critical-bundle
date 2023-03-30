@@ -6,7 +6,7 @@ build-production:
 	@echo Building and tagging BACKEND
 	docker build --platform linux/amd64 -t teamsviluppo/critical-bundle-backend ./backend
 	@echo Building and tagging FRONTEND
-	docker build -t teamsviluppo/critical-bundle-frontend ./frontend
+	docker build --platform linux/amd64 -t teamsviluppo/critical-bundle-frontend ./frontend
 	@echo --- build-production finished ---
 
 publish-production:
